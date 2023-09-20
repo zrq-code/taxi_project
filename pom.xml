@@ -17,6 +17,7 @@
 	<description>online-taxi-public</description>
 	<modules>
 		<module>api-passenger</module>
+		<module>service-verificationCode</module>
 	</modules>
 	<properties>
 		<java.version>11</java.version>

@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  nacos:
+    image: nacos/nacos-server:2.0.4
+    container_name: nacos-standalone-mysql
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    environment:
+      MYSQL_SERVICE_HOST: localhost
+      MYSQL_SERVICE_PORT: "3306"
+      MYSQL_DATABASE: nacos
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
