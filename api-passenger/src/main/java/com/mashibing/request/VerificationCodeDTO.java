@@ -1,4 +1,4 @@
-package com.mashibing.com.mashibing.request;
+package com.mashibing.request;
 
 import lombok.Data;
 import lombok.Getter;

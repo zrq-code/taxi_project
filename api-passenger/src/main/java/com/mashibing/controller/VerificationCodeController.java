@@ -1,6 +1,7 @@
 package com.mashibing.controller;
 
-import com.mashibing.com.mashibing.request.VerificationCodeDTO;
+import com.mashibing.dto.ResponseResult;
+import com.mashibing.request.VerificationCodeDTO;
 import com.mashibing.service.VerificationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +14,11 @@ public class VerificationCodeController {
     @Autowired
     private VerificationCodeService verificationCodeService;
 
+
     @GetMapping("/verification-code")
-    public String verificationCode(@RequestBody VerificationCodeDTO verificationCodeDTO){
+    public ResponseResult verificationCode(@RequestBody VerificationCodeDTO verificationCodeDTO){
         String passengerPhone = verificationCodeDTO.getPassengerPhone();
         System.out.println("手机号为：" + passengerPhone);
-        return verificationCodeService.generatorCode(passengerPhone);
+        return ResponseResult.success(verificationCodeService.generatorCode(passengerPhone));
     }
 }
