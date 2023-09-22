@@ -19,6 +19,7 @@
 		<module>api-passenger</module>
 		<module>service-verificationCode</module>
         <module>internal-common</module>
+        <module>service-passenger-user</module>
     </modules>
 	<properties>
 		<java.version>11</java.version>
