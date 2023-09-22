@@ -4,11 +4,14 @@ import com.mashibing.dto.ResponseResult;
 import com.mashibing.remote.ServiceVerificationClient;
 import com.mashibing.response.NumberCodeResponse;
 import com.mashibing.response.TokenResponse;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
+
+import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
 
 @Service
 public class VerificationCodeService {
@@ -35,11 +38,15 @@ public class VerificationCodeService {
 
         System.out.println("存入redis");
         //key,value,过期时间
-        String key = verificationCodePrefix + passengerPhone;
+        String key = generateKeyByPhone(passengerPhone);
         //存入redis
         stringRedisTemplate.opsForValue().set(key, code + "", 2, TimeUnit.MINUTES);
         //通过短信服务商，将对应的验证码发到手机上，阿里腾讯信息
         return ResponseResult.success("");
+    }
+
+    private static String generateKeyByPhone(String passengerPhone) {
+        return verificationCodePrefix + passengerPhone;
     }
 
     /**
@@ -52,7 +59,19 @@ public class VerificationCodeService {
     public ResponseResult checkCode(String passengerPhone, String verificationCode) {
         //根据手机号，去redis读取验证码
         System.out.println("根据手机号，去redis读取验证码");
+        //生成key
+        String key = generateKeyByPhone(passengerPhone);
+        //根据key生成value
+        String codeRedis = stringRedisTemplate.opsForValue().get(key);
+        System.out.println("redis中的value: " + codeRedis);
         //校验验证码
+        if (StringUtils.isBlank(codeRedis)){
+            return ResponseResult.fail(VERIFICATION_CODE_ERROR.getCode(), VERIFICATION_CODE_ERROR.getValue());
+        }
+        if (!verificationCode.trim().equals(codeRedis)){
+            return ResponseResult.fail(VERIFICATION_CODE_ERROR.getCode(), VERIFICATION_CODE_ERROR.getValue());
+        }
+
         System.out.println("校验验证码");
         //判断原来是否有用户，并进行处理
         System.out.println("判断原来是否有用户，并进行处理");
