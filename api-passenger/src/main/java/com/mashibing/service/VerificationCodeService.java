@@ -1,7 +1,9 @@
 package com.mashibing.service;
 
 import com.mashibing.dto.ResponseResult;
+import com.mashibing.remote.ServicePassengerUserClient;
 import com.mashibing.remote.ServiceVerificationClient;
+import com.mashibing.request.VerificationCodeDTO;
 import com.mashibing.response.NumberCodeResponse;
 import com.mashibing.response.TokenResponse;
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +20,8 @@ public class VerificationCodeService {
 
     @Autowired
     private ServiceVerificationClient serviceVerificationClient;
+    @Autowired
+    private ServicePassengerUserClient servicePassengerUserClient;
     //乘客验证码前缀
     private static final String verificationCodePrefix = "passenger-verification-code-";
     @Autowired
@@ -74,6 +78,9 @@ public class VerificationCodeService {
 
         System.out.println("校验验证码");
         //判断原来是否有用户，并进行处理
+        VerificationCodeDTO dto = new VerificationCodeDTO();
+        dto.setPassengerPhone(passengerPhone);
+        servicePassengerUserClient.loginOrRegister(dto);
         System.out.println("判断原来是否有用户，并进行处理");
         //颁发令牌
         System.out.println("颁发令牌");
