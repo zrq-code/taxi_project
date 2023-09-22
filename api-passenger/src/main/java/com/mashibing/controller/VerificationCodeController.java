@@ -19,6 +19,6 @@ public class VerificationCodeController {
     public ResponseResult verificationCode(@RequestBody VerificationCodeDTO verificationCodeDTO){
         String passengerPhone = verificationCodeDTO.getPassengerPhone();
         System.out.println("手机号为：" + passengerPhone);
-        return ResponseResult.success(verificationCodeService.generatorCode(passengerPhone));
+        return verificationCodeService.generatorCode(passengerPhone);
     }
 }
