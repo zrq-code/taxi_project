@@ -10,6 +10,6 @@ public class PassengerUser {
     private LocalDateTime gmtModified;
     private String passengerPhone;
     private String passengerName;
-    private String passengerGender;
-    private String state;
+    private int passengerGender;
+    private int state;
 }
