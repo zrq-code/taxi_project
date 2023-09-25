@@ -18,7 +18,6 @@
 	<modules>
 		<module>api-passenger</module>
 		<module>service-verificationCode</module>
-        <module>internal-common</module>
         <module>service-passenger-user</module>
     </modules>
 	<properties>
@@ -41,6 +40,12 @@
 			<groupId>com.mashibing</groupId>
 			<artifactId>internal-common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>3.14.0</version>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>

@@ -6,6 +6,7 @@ import com.mashibing.remote.ServiceVerificationClient;
 import com.mashibing.request.VerificationCodeDTO;
 import com.mashibing.response.NumberCodeResponse;
 import com.mashibing.response.TokenResponse;
+import com.mashibing.util.JwtUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
+import static com.mashibing.constant.IdentityConstant.PASSENGER_IDENTITY;
 
 @Service
 public class VerificationCodeService {
@@ -69,10 +71,10 @@ public class VerificationCodeService {
         String codeRedis = stringRedisTemplate.opsForValue().get(key);
         System.out.println("redis中的value: " + codeRedis);
         //校验验证码
-        if (StringUtils.isBlank(codeRedis)){
+        if (StringUtils.isBlank(codeRedis)) {
             return ResponseResult.fail(VERIFICATION_CODE_ERROR.getCode(), VERIFICATION_CODE_ERROR.getValue());
         }
-        if (!verificationCode.trim().equals(codeRedis)){
+        if (!verificationCode.trim().equals(codeRedis)) {
             return ResponseResult.fail(VERIFICATION_CODE_ERROR.getCode(), VERIFICATION_CODE_ERROR.getValue());
         }
 
@@ -84,9 +86,10 @@ public class VerificationCodeService {
         System.out.println("判断原来是否有用户，并进行处理");
         //颁发令牌
         System.out.println("颁发令牌");
+        String token = JwtUtils.generatorToken(passengerPhone, PASSENGER_IDENTITY);
         //响应
         TokenResponse tokenResponse = new TokenResponse();
-        tokenResponse.setToken("token value");
+        tokenResponse.setToken(token);
         return ResponseResult.success(tokenResponse);
 
     }
