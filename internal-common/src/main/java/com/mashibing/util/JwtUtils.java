@@ -47,6 +47,21 @@ public class JwtUtils {
                 .build();
     }
 
+    /**
+     * 校验token
+     * @param token
+     * @return
+     */
+    public static TokenResult checkToken(String token){
+        TokenResult tokenResult = null;
+        try {
+            tokenResult = JwtUtils.parseToken(token);
+        } catch (Exception e) {
+
+        }
+        return null;
+    }
+
     public static void main(String[] args) {
         String res = generatorToken("13914041548", "passenger", "accessToken");
         System.out.println("生成的token: " + res);
