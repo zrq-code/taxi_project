@@ -8,7 +8,6 @@ import com.mashibing.dto.TokenResult;
 import lombok.experimental.UtilityClass;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +17,8 @@ public class JwtUtils {
     public static final String SIGN = "RICzz!@_@";
     public static final String JWT_KEY_PHONE = "passengerPhone";
     public static final String JWT_KEY_IDENTITY = "identity";
-    public static final String JWT_TOKEN_TYPE= "tokenType";
+    public static final String JWT_TOKEN_TYPE = "tokenType";
+    public static final String JWT_TOKEN_TIME = "tokenTime";
 
     //生成token
     public static String generatorToken(String passengerPhone, String identity, String tokenType) {
@@ -27,9 +27,7 @@ public class JwtUtils {
         map.put(JWT_KEY_IDENTITY, identity);
         map.put(JWT_TOKEN_TYPE, tokenType);
         //token过期时间
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, 1);
-        Date time = calendar.getTime();
+        map.put(JWT_TOKEN_TIME, Calendar.getInstance().getTime().toString());
         //整合map
         JWTCreator.Builder builder = JWT.create();
         map.forEach(builder::withClaim);
@@ -49,17 +47,18 @@ public class JwtUtils {
 
     /**
      * 校验token
+     *
      * @param token
      * @return
      */
-    public static TokenResult checkToken(String token){
+    public static TokenResult checkToken(String token) {
         TokenResult tokenResult = null;
         try {
             tokenResult = JwtUtils.parseToken(token);
         } catch (Exception e) {
 
         }
-        return null;
+        return tokenResult;
     }
 
     public static void main(String[] args) {
