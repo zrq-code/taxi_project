@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 
+import static com.mashibing.constant.TokenConstant.ACCESS_TOKEN_TYPE;
+
 public class JwtInterceptor implements HandlerInterceptor {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -38,8 +40,6 @@ public class JwtInterceptor implements HandlerInterceptor {
             resultString = "token invalid";
             result = false;
         }
-
-
         if (tokenResult == null){
             resultString = "token invalid";
             result = false;
@@ -47,7 +47,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             //拼接key
             String phone = tokenResult.getPhone();
             String identity = tokenResult.getIdentity();
-            String tokenKey = RedisPrefixUtils.generateTokenKey(phone, identity);
+            String tokenKey = RedisPrefixUtils.generateTokenKey(phone, identity, ACCESS_TOKEN_TYPE);
             //从redis中取出token
             String tokenRedis = stringRedisTemplate.opsForValue().get(tokenKey);
             if (StringUtils.isBlank(tokenRedis)){

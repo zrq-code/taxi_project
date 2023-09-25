@@ -15,8 +15,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
-import static com.mashibing.constant.IdentityConstant.PASSENGER_IDENTITY;
+import static com.mashibing.constant.CommonStatusEnum.*;
+import static com.mashibing.constant.IdentityConstant.*;
+import static com.mashibing.constant.TokenConstant.*;
+
 
 @Service
 public class VerificationCodeService {
@@ -83,13 +85,17 @@ public class VerificationCodeService {
         System.out.println("判断原来是否有用户，并进行处理");
         //颁发令牌
         System.out.println("颁发令牌");
-        String token = JwtUtils.generatorToken(passengerPhone, PASSENGER_IDENTITY);
+        String accessToken = JwtUtils.generatorToken(passengerPhone, PASSENGER_IDENTITY, ACCESS_TOKEN_TYPE);
+        String refreshToken = JwtUtils.generatorToken(passengerPhone, PASSENGER_IDENTITY, REFRESH_TOKEN_TYPE);
         //token存到redis中
-        String tokenKey = RedisPrefixUtils.generateTokenKey(passengerPhone, PASSENGER_IDENTITY);
-        stringRedisTemplate.opsForValue().set(tokenKey, token, 30, TimeUnit.DAYS);
+        String accessTokenKey = RedisPrefixUtils.generateTokenKey(passengerPhone, PASSENGER_IDENTITY, ACCESS_TOKEN_TYPE);
+        stringRedisTemplate.opsForValue().set(accessTokenKey, accessToken, 30, TimeUnit.DAYS);
+        String refreshTokenKey = RedisPrefixUtils.generateTokenKey(passengerPhone, PASSENGER_IDENTITY, REFRESH_TOKEN_TYPE);
+        stringRedisTemplate.opsForValue().set(refreshTokenKey, refreshToken, 31, TimeUnit.DAYS);
         //响应
         TokenResponse tokenResponse = new TokenResponse();
-        tokenResponse.setToken(token);
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setRefreshToken(refreshToken);
         return ResponseResult.success(tokenResponse);
 
     }
