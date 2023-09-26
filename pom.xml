@@ -19,6 +19,7 @@
 		<module>api-passenger</module>
 		<module>service-verificationCode</module>
         <module>service-passenger-user</module>
+        <module>service-price</module>
     </modules>
 	<properties>
 		<java.version>11</java.version>
@@ -37,9 +38,10 @@
 			<classifier>jdk15</classifier>
 		</dependency>
 		<dependency>
-			<groupId>com.mashibing</groupId>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>internal-common</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>2.4.13</version>
+			<scope>compile</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
 		<dependency>
