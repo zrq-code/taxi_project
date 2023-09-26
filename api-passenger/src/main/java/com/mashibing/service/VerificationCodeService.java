@@ -27,8 +27,6 @@ public class VerificationCodeService {
     private ServiceVerificationClient serviceVerificationClient;
     @Autowired
     private ServicePassengerUserClient servicePassengerUserClient;
-
-
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 

@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.mashibing.constant.CommonStatusEnum.USER_NOT_EXISTS;
+
 @Service
 public class UserService {
     @Autowired
@@ -34,5 +36,17 @@ public class UserService {
             passengerUserMapper.insert(user);
         }
         return ResponseResult.success();
+    }
+
+    public ResponseResult getUSerByPhone(String passengerPhone){
+        //根据手机号查询用户信息
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("passenger_phone", passengerPhone);
+        List<PassengerUser> passengerUsers = passengerUserMapper.selectByMap(map);
+        if (passengerUsers.size() == 0){
+            return ResponseResult.fail(USER_NOT_EXISTS.getCode(), USER_NOT_EXISTS.getValue());
+        }else {
+            return ResponseResult.success(passengerUsers.get(0));
+        }
     }
 }

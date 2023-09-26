@@ -3,6 +3,7 @@ package com.mashibing.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+
 @Data
 public class PassengerUser {
     private Long id;
@@ -12,4 +13,5 @@ public class PassengerUser {
     private String passengerName;
     private int passengerGender;
     private int state;
+    private String profilePhoto;
 }
