@@ -20,7 +20,8 @@
 		<module>service-verificationCode</module>
         <module>service-passenger-user</module>
         <module>service-price</module>
-    </modules>
+		<module>service-map</module>
+	</modules>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
