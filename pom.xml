@@ -21,7 +21,9 @@
         <module>service-passenger-user</module>
         <module>service-price</module>
 		<module>service-map</module>
-	</modules>
+        <module>serivce-driver-user</module>
+        <module>api-boss</module>
+    </modules>
 	<properties>
 		<java.version>11</java.version>
 	</properties>
