@@ -23,6 +23,7 @@
 		<module>service-map</module>
         <module>serivce-driver-user</module>
         <module>api-boss</module>
+        <module>api-driver</module>
     </modules>
 	<properties>
 		<java.version>11</java.version>
