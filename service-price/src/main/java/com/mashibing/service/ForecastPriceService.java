@@ -66,7 +66,7 @@ public class ForecastPriceService {
         //总里程km
         double distanceMile = BigDecimalUtils.divide(distance, 1000);
         //起步里程
-        double startMile = (double)priceRule.getStartMile();
+        double startMile = (double) priceRule.getStartMile();
         double subtract = BigDecimalUtils.subtract(distanceMile, startMile);
         //最终收费里程数
         double mile = subtract < 0 ? 0 : subtract;
@@ -81,7 +81,7 @@ public class ForecastPriceService {
         BigDecimal unitPricePerMinute = BigDecimal.valueOf(priceRule.getUnitPricePerMinute());
         //时长单价
         double timeFare = BigDecimalUtils.multiply(timeMinute, priceRule.getUnitPricePerMinute());
-        price = BigDecimalUtils.add(price,timeFare);
+        price = BigDecimalUtils.add(price, timeFare);
         BigDecimal priceDecimal = BigDecimal.valueOf(price);
         priceDecimal = priceDecimal.setScale(2, RoundingMode.HALF_UP);
         return priceDecimal.doubleValue();
