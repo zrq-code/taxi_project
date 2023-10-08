@@ -15,9 +15,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.mashibing.constant.CommonStatusEnum.*;
-import static com.mashibing.constant.IdentityConstant.*;
-import static com.mashibing.constant.TokenConstant.*;
+import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
+import static com.mashibing.constant.IdentityConstant.PASSENGER_IDENTITY;
+import static com.mashibing.constant.TokenConstant.ACCESS_TOKEN_TYPE;
+import static com.mashibing.constant.TokenConstant.REFRESH_TOKEN_TYPE;
 
 
 @Service
@@ -45,7 +46,7 @@ public class VerificationCodeService {
 
         System.out.println("存入redis");
         //key,value,过期时间
-        String key = RedisPrefixUtils.generateKeyByPhone(passengerPhone);
+        String key = RedisPrefixUtils.generateKeyByPhone(passengerPhone, PASSENGER_IDENTITY);
         //存入redis
         stringRedisTemplate.opsForValue().set(key, code + "", 2, TimeUnit.MINUTES);
         //通过短信服务商，将对应的验证码发到手机上，阿里腾讯信息
@@ -63,7 +64,7 @@ public class VerificationCodeService {
         //根据手机号，去redis读取验证码
         System.out.println("根据手机号，去redis读取验证码");
         //生成key
-        String key = RedisPrefixUtils.generateKeyByPhone(passengerPhone);
+        String key = RedisPrefixUtils.generateKeyByPhone(passengerPhone, PASSENGER_IDENTITY);
         //根据key生成value
         String codeRedis = stringRedisTemplate.opsForValue().get(key);
         System.out.println("redis中的value: " + codeRedis);

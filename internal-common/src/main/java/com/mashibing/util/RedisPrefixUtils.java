@@ -2,17 +2,18 @@ package com.mashibing.util;
 
 public class RedisPrefixUtils {
     //乘客验证码前缀
-    public static final String verificationCodePrefix = "passenger-verification-code-";
+    public static final String verificationCodePrefix = "verification-code-";
     public static final String tokenPrefix = "token-";
 
     /**
      * 根据手机号生成验证码的key
      *
-     * @param passengerPhone
+     * @param phone
+     * @param identity
      * @return
      */
-    public static String generateKeyByPhone(String passengerPhone) {
-        return verificationCodePrefix + passengerPhone;
+    public static String generateKeyByPhone(String phone, String identity) {
+        return verificationCodePrefix + identity + "-" + phone;
     }
 
     /**

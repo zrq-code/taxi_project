@@ -7,6 +7,9 @@ import com.mashibing.service.DriverUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import static com.mashibing.constant.DriverCarConstants.DRIVER_EXISTS;
+import static com.mashibing.constant.DriverCarConstants.DRIVER_NOT_EXISTS;
+
 @RestController
 public class UserController {
     @Autowired
@@ -23,13 +26,13 @@ public class UserController {
     }
 
     @GetMapping("/check-driver/{driverPhone}")
-    public ResponseResult getUser(@PathVariable("driverPhone") String driverPhone) {
+    public ResponseResult<DriverUserExistsResponse> getUser(@PathVariable("driverPhone") String driverPhone) {
         ResponseResult<DriverUser> driverUserByPhone = driverUserService.getDriverUserByPhone(driverPhone);
         DriverUser data = driverUserByPhone.getData();
         DriverUserExistsResponse driverUserExistsResponse = new DriverUserExistsResponse();
-        int ifExists = 1;
+        int ifExists = DRIVER_EXISTS;
         if (data == null) {
-            ifExists = 0;
+            ifExists = DRIVER_NOT_EXISTS;
             driverUserExistsResponse.setDriverPhone(driverPhone);
             driverUserExistsResponse.setIfExists(ifExists);
         }else {
