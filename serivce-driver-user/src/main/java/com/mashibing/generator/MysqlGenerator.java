@@ -19,7 +19,7 @@ public class MysqlGenerator {
                     builder.parent("com.mashibing").pathInfo(Collections.singletonMap(OutputFile.mapperXml, "/Users/Rick_Zhou/IdeaProjects/online-taxi-public/api-driver/src/main/java/com/mashibing/mapper"));
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("driver_car_binding_relationship");
+                    builder.addInclude("driver_user_work_status");
                 })
                 .templateEngine(new FreemarkerTemplateEngine()).execute();
     }
