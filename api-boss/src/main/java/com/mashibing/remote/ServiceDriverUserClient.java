@@ -1,5 +1,7 @@
 package com.mashibing.remote;
 
+import com.mashibing.dto.Car;
+import com.mashibing.dto.DriverCarBindingRelationship;
 import com.mashibing.dto.DriverUser;
 import com.mashibing.dto.ResponseResult;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -15,4 +17,12 @@ public interface ServiceDriverUserClient {
 
     @PutMapping("/user")
     public ResponseResult updateDriverUser(@RequestBody DriverUser driverUser);
+
+    @PostMapping("/car")
+    public ResponseResult addCar(@RequestBody Car car);
+
+    @PostMapping("/driver-car-relationship/bind")
+    public ResponseResult bind(@RequestBody DriverCarBindingRelationship driverCarBindingRelationship);
+    @PostMapping("/driver-car-relationship/unbind")
+    public ResponseResult unbind(@RequestBody DriverCarBindingRelationship driverCarBindingRelationship);
 }
