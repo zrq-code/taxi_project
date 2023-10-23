@@ -15,6 +15,10 @@ public class AmapConfigConstants {
      */
     public static final String SERVICE_ADD_URL = "https://tsapi.amap.com/v1/track/service/add";
     /**
+     * 新增服务
+     */
+    public static final String TERMINAL_ADD_URL = "https://tsapi.amap.com/v1/track/terminal/add";
+    /**
      * json key
      */
     public static final String STATUS = "status";
