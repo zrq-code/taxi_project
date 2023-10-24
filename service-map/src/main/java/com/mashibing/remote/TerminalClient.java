@@ -20,13 +20,13 @@ public class TerminalClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    public ResponseResult add(String name){
+    public ResponseResult add(String name, String desc){
         StringBuilder url = new StringBuilder();
         url.append(TERMINAL_ADD_URL);
-        url.append("?");
-        url.append("key=").append(amapKey);
+        url.append("?").append("key=").append(amapKey);
         url.append("&").append("sid=").append(amapSid);
         url.append("&").append("name=").append(name);
+        url.append("&").append("desc=").append(desc);
         //调用高德接口
         ResponseEntity<String> terminalEntity = restTemplate.postForEntity(url.toString(), null, String.class);
         //解析接口
