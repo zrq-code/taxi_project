@@ -28,9 +28,11 @@ public class TerminalClient {
         url.append("&").append("name=").append(name);
         url.append("&").append("desc=").append(desc);
         //调用高德接口
+        System.out.println("新增终端 " + url);
         ResponseEntity<String> terminalEntity = restTemplate.postForEntity(url.toString(), null, String.class);
         //解析接口
         String body = terminalEntity.getBody();
+        System.out.println("body " + body);
         JSONObject result = JSONObject.fromObject(body);
         JSONObject data = result.getJSONObject("data");
         String tid = data.getString("tid");

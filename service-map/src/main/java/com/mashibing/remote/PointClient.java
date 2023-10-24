@@ -42,12 +42,13 @@ public class PointClient {
             url.append("%7D");
         }
         url.append("%5D");
-        System.out.println("URL"+url);
+        System.out.println("新增points "+url);
         //调用高德接口
         ResponseEntity<String> pointsEntity = restTemplate.postForEntity(URI.create(url.toString()), null, String.class);
         //解析接口
-        String body = pointsEntity.getBody();
 
+        String body = pointsEntity.getBody();
+        System.out.println("body " + body);
         return ResponseResult.success();
     }
 }

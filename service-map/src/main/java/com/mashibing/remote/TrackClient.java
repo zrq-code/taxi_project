@@ -29,9 +29,11 @@ public class TrackClient {
         url.append("&").append("sid=").append(amapSid);
         url.append("&").append("tid=").append(tid);
         //调用高德接口
+        System.out.println("新增track " + url);
         ResponseEntity<String> terminalEntity = restTemplate.postForEntity(url.toString(), null, String.class);
         //解析接口
         String body = terminalEntity.getBody();
+        System.out.println("body " + body);
         JSONObject result = JSONObject.fromObject(body);
         JSONObject data = result.getJSONObject("data");
         String trid = data.getString("trid");
