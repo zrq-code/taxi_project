@@ -2,6 +2,7 @@ package com.mashibing.remote;
 
 import com.mashibing.dto.ResponseResult;
 import com.mashibing.response.TerminalResponse;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.mashibing.constant.AmapConfigConstants.TERMINAL_ADD_URL;
+import static com.mashibing.constant.AmapConfigConstants.TERMINAL_AROUND_SEARCH_URL;
 
 @Service
 public class TerminalClient {
@@ -20,7 +25,7 @@ public class TerminalClient {
     @Autowired
     private RestTemplate restTemplate;
 
-    public ResponseResult add(String name, String desc){
+    public ResponseResult add(String name, String desc) {
         StringBuilder url = new StringBuilder();
         url.append(TERMINAL_ADD_URL);
         url.append("?").append("key=").append(amapKey);
@@ -39,6 +44,35 @@ public class TerminalClient {
         TerminalResponse terminalResponse = new TerminalResponse();
         terminalResponse.setTid(tid);
         return ResponseResult.success(terminalResponse);
+    }
+
+    public ResponseResult<List<TerminalResponse>> aroundsearch(String center, Integer radius) {
+        StringBuilder url = new StringBuilder();
+        url.append(TERMINAL_AROUND_SEARCH_URL);
+        url.append("?").append("key=").append(amapKey);
+        url.append("&").append("sid=").append(amapSid);
+        url.append("&").append("center=").append(center);
+        url.append("&").append("radius=").append(radius);
+        //调用高德接口
+        System.out.println("查询周边终端 " + url);
+        ResponseEntity<String> aroundsearchEntity = restTemplate.postForEntity(url.toString(), null, String.class);
+        //解析接口
+        String body = aroundsearchEntity.getBody();
+        System.out.println("body " + body);
+        JSONObject result = JSONObject.fromObject(body);
+        JSONObject data = result.getJSONObject("data");
+        JSONArray jsonArray = data.getJSONArray("results");
+        List<TerminalResponse> terminalResponses = new ArrayList<>();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            TerminalResponse terminalResponse = new TerminalResponse();
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            Long carId = Long.valueOf(jsonObject.getString("desc"));
+            String tid = jsonObject.getString("tid");
+            terminalResponse.setCarId(carId);
+            terminalResponse.setTid(tid);
+            terminalResponses.add(terminalResponse);
+        }
+        return ResponseResult.success(terminalResponses);
     }
 
 }
