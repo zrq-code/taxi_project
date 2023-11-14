@@ -8,6 +8,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
+import static com.mashibing.constant.OrderConstants.ORDER_START;
+
 /**
  * <p>
  *  服务类
@@ -21,9 +25,14 @@ public class OrderInfoService {
     @Autowired
     private OrderInfoMapper orderInfoMapper;
     public ResponseResult add(OrderRequest orderRequest) {
-        OrderInfo order = new OrderInfo();
-        BeanUtils.copyProperties(orderRequest, order);
-        orderInfoMapper.insert(order);
+        OrderInfo orderInfo = new OrderInfo();
+        BeanUtils.copyProperties(orderRequest, orderInfo);
+        orderInfo.setOrderStatus(ORDER_START);
+
+        LocalDateTime now = LocalDateTime.now();
+        orderInfo.setGmtCreate(now);
+        orderInfo.setGmtModified(now );
+        orderInfoMapper.insert(orderInfo);
         return ResponseResult.success();
     }
     public ResponseResult testMapper() {
