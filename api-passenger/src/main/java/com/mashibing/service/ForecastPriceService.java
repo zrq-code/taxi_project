@@ -25,9 +25,11 @@ public class ForecastPriceService {
         log.info("出发地纬度： "+forecastPriceDTO.getDestLatitude());
         log.info("调用计价服务，计算价格");
         ResponseResult<ForecastPriceResponse> forecast = servicePriceClient.forecast(forecastPriceDTO);
-
+        double price = forecast.getData().getPrice();
         ForecastPriceResponse forecastPriceResponse = new ForecastPriceResponse();
-        forecastPriceResponse.setPrice(forecast.getData().getPrice());
+        forecastPriceResponse.setPrice(price);
+        forecastPriceResponse.setCityCode(forecastPriceDTO.getCityCode());
+        forecastPriceResponse.setVehicleType(forecastPriceDTO.getVehicleType());
         return ResponseResult.success(forecastPriceResponse);
     }
 }

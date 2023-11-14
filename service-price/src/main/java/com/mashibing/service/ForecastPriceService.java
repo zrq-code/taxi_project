@@ -1,5 +1,6 @@
 package com.mashibing.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mashibing.dto.PriceRule;
 import com.mashibing.dto.ResponseResult;
 import com.mashibing.mapper.PriceRuleMapper;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.mashibing.constant.CommonStatusEnum.PRICE_RULE_EMPTY;
@@ -34,11 +34,12 @@ public class ForecastPriceService {
         Integer duration = direction.getData().getDuration();
 
         log.info("读取计价规则");
-        HashMap<String, Object> query = new HashMap<>();
-        query.put("city_code", "110000");
-        query.put("vehicle_type", "1");
+        QueryWrapper<PriceRule> wrapper = new QueryWrapper<>();
+        wrapper.eq("city_code", forecastPriceDTO.getCityCode());
+        wrapper.eq("vehicle_type", forecastPriceDTO.getVehicleType());
+        wrapper.orderByDesc("fare_version");
 
-        List<PriceRule> priceRules = priceRuleMapper.selectByMap(query);
+        List<PriceRule> priceRules = priceRuleMapper.selectList(wrapper);
         if (priceRules.size() == 0) {
             return ResponseResult.fail(PRICE_RULE_EMPTY.getCode(), PRICE_RULE_EMPTY.getValue());
         }
@@ -48,6 +49,8 @@ public class ForecastPriceService {
         double price = getPrice(distance, duration, priceRule);
         ForecastPriceResponse forecastPriceResponse = new ForecastPriceResponse();
         forecastPriceResponse.setPrice(price);
+        forecastPriceResponse.setCityCode(forecastPriceDTO.getCityCode());
+        forecastPriceResponse.setVehicleType(forecastPriceDTO.getVehicleType());
         return ResponseResult.success(forecastPriceResponse);
     }
 
