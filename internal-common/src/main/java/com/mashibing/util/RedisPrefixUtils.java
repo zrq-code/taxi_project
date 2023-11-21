@@ -4,6 +4,8 @@ public class RedisPrefixUtils {
     //乘客验证码前缀
     public static final String verificationCodePrefix = "verification-code-";
     public static final String tokenPrefix = "token-";
+    //黑名单设备号
+    public static final String blackDeviceCodePrefix = "black-device-";
 
     /**
      * 根据手机号生成验证码的key

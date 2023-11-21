@@ -6,6 +6,7 @@ import com.mashibing.dto.ResponseResult;
 import com.mashibing.mapper.PriceRuleMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -91,5 +92,19 @@ public class PriceRuleService {
 
         priceRuleMapper.insert(priceRule);
         return ResponseResult.success();
+    }
+
+    public ResponseResult isExist(PriceRule priceRule) {
+        String cityCode = priceRule.getCityCode();
+        String vehicleType = priceRule.getVehicleType();
+        QueryWrapper<PriceRule> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("city_code", cityCode).eq("vehicle_type", vehicleType);
+        queryWrapper.orderByDesc("fare_version");
+        List<PriceRule> priceRules = priceRuleMapper.selectList(queryWrapper);
+        if (!CollectionUtils.isEmpty(priceRules)){
+            return ResponseResult.success(true);
+        }else {
+            return ResponseResult.success(false);
+        }
     }
 }
