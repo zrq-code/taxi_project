@@ -2,17 +2,20 @@ package com.mashibing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mashibing.dto.OrderInfo;
+import com.mashibing.dto.PriceRule;
 import com.mashibing.dto.ResponseResult;
 import com.mashibing.mapper.OrderInfoMapper;
+import com.mashibing.remote.ServiceDriverUserClient;
+import com.mashibing.remote.ServicePriceClient;
 import com.mashibing.request.OrderRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.mashibing.constant.CommonStatusEnum.DEVICE_IS_BLACK;
-import static com.mashibing.constant.CommonStatusEnum.ORDER_GOING_ON;
+import static com.mashibing.constant.CommonStatusEnum.*;
 import static com.mashibing.constant.OrderConstants.*;
 import static com.mashibing.util.RedisPrefixUtils.blackDeviceCodePrefix;
 
@@ -25,13 +28,25 @@ import static com.mashibing.util.RedisPrefixUtils.blackDeviceCodePrefix;
  * @since 2023-10-25
  */
 @Service
+@Slf4j
 public class OrderInfoService {
     @Autowired
     private OrderInfoMapper orderInfoMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private ServicePriceClient servicePriceClient;
+    @Autowired
+    private ServiceDriverUserClient serviceDriverUserClient;
 
     public ResponseResult add(OrderRequest orderRequest) {
+        //测试当前城市是否有可用的司机
+        ResponseResult<Boolean> result = serviceDriverUserClient.isAvailableDriver(orderRequest.getAddress());
+        log.info("测试城市是否有司机结果：" + result.getData());
+        if (!result.getData()){
+            return ResponseResult.fail(CITY_DRIVER_EMPTY.getCode(), CITY_DRIVER_EMPTY.getValue());
+        }
+
         //需要判断 下单的设备是否是黑名单设备
         String deviceCode = orderRequest.getDeviceCode();
         //生成key
@@ -46,6 +61,10 @@ public class OrderInfoService {
             return ResponseResult.fail(ORDER_GOING_ON.getCode(), ORDER_GOING_ON.getValue());
         }
 
+        if (!isPriceRuleExist(orderRequest)) {
+            return ResponseResult.fail(CITY_SERVICE_NOT_SERVICE.getCode(), CITY_SERVICE_NOT_SERVICE.getValue());
+        }
+
 
 /*        OrderInfo orderInfo = new OrderInfo();
         BeanUtils.copyProperties(orderRequest, orderInfo);
@@ -56,6 +75,19 @@ public class OrderInfoService {
         orderInfo.setGmtModified(now );
         orderInfoMapper.insert(orderInfo);*/
         return ResponseResult.success();
+    }
+
+    private boolean isPriceRuleExist(OrderRequest orderRequest) {
+        String fareType = orderRequest.getFareType();
+        int index = fareType.indexOf("$");
+        String cityCode = fareType.substring(0, index);
+        String vehicleType = fareType.substring(index + 1);
+
+        PriceRule priceRule = new PriceRule();
+        priceRule.setCityCode(cityCode);
+        priceRule.setVehicleType(vehicleType);
+
+        return servicePriceClient.isPriceRuleExist(priceRule).getData();
     }
 
     private boolean isBlackDevice(String deviceCodeKey) {

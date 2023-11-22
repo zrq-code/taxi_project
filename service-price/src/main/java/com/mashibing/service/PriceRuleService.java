@@ -40,6 +40,9 @@ public class PriceRuleService {
         priceRuleQueryWrapper.eq("vehicle_type", vehicleType);
         priceRuleQueryWrapper.orderByDesc("fare_version");
 
+        //是否有计价规则
+
+
 
         List<PriceRule> priceRules = priceRuleMapper.selectList(priceRuleQueryWrapper);
         Integer fareVersion = 0;
@@ -93,6 +96,7 @@ public class PriceRuleService {
         priceRuleMapper.insert(priceRule);
         return ResponseResult.success();
     }
+
 
     public ResponseResult isExist(PriceRule priceRule) {
         String cityCode = priceRule.getCityCode();

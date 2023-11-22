@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.mashibing.constant.CommonStatusEnum.DRIVER_NOT_EXIST;
+import static com.mashibing.constant.CommonStatusEnum.DRIVER_NOT_EXITST;
 import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
 import static com.mashibing.constant.DriverCarConstants.DRIVER_NOT_EXISTS;
 import static com.mashibing.constant.IdentityConstant.DRIVER_IDENTITY;
@@ -38,7 +38,7 @@ public class VerificationCodeService {
         ResponseResult<DriverUserExistsResponse> responseResult = serviceDriverUserClient.checkDriver(driverPhone);
         DriverUserExistsResponse data = responseResult.getData();
         if (data.getIfExists() == DRIVER_NOT_EXISTS) {
-            return ResponseResult.fail(DRIVER_NOT_EXIST.getCode(), DRIVER_NOT_EXIST.getValue());
+            return ResponseResult.fail(DRIVER_NOT_EXITST.getCode(), DRIVER_NOT_EXITST.getValue());
         }
         log.info(driverPhone + " 司机存在");
         //获取验证码

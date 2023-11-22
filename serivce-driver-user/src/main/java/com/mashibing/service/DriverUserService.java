@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.mashibing.constant.CommonStatusEnum.DRIVER_NOT_EXIST;
+import static com.mashibing.constant.CommonStatusEnum.DRIVER_NOT_EXITST;
 import static com.mashibing.constant.DriverCarConstants.DRIVER_STATE_VALID;
 import static com.mashibing.constant.DriverCarConstants.DRIVER_WORK_STOP;
 
@@ -34,7 +34,7 @@ public class DriverUserService {
         map.put("state", DRIVER_STATE_VALID);
         List<DriverUser> driverUsers = driverUserMapper.selectByMap(map);
         if (driverUsers.isEmpty()){
-            return ResponseResult.fail(DRIVER_NOT_EXIST.getCode(), DRIVER_NOT_EXIST.getValue());
+            return ResponseResult.fail(DRIVER_NOT_EXITST.getCode(), DRIVER_NOT_EXITST.getValue());
         }
         return ResponseResult.success(driverUsers.get(0));
     }

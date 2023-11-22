@@ -35,7 +35,7 @@ public class DriverCarBindingRelationshipService {
         queryWrapper.eq("bind_state", DRIVER_CAR_BIND);
         Integer integer = driverCarBindingRelationshipMapper.selectCount(queryWrapper);
         if (integer>0){
-            return ResponseResult.fail(DRIVER_CAR_BIND_EXIST.getCode(), DRIVER_CAR_BIND_EXIST.getValue());
+            return ResponseResult.fail(DRIVER_CAR_BIND_EXISTS.getCode(), DRIVER_CAR_BIND_EXISTS.getValue());
         }
         //司机被绑定
         queryWrapper = new QueryWrapper<>();
@@ -43,7 +43,7 @@ public class DriverCarBindingRelationshipService {
         queryWrapper.eq("bind_state", DRIVER_CAR_BIND);
         integer = driverCarBindingRelationshipMapper.selectCount(queryWrapper);
         if (integer>0){
-            return ResponseResult.fail(DRIVER_BIND_EXIST.getCode(), DRIVER_BIND_EXIST.getValue());
+            return ResponseResult.fail(DRIVER_BIND_EXISTS.getCode(), DRIVER_BIND_EXISTS.getValue());
         }
 
         //司机被绑定
@@ -52,7 +52,7 @@ public class DriverCarBindingRelationshipService {
         queryWrapper.eq("bind_state", DRIVER_CAR_BIND);
         integer = driverCarBindingRelationshipMapper.selectCount(queryWrapper);
         if (integer>0){
-            return ResponseResult.fail(CAR_BIND_EXIST.getCode(), CAR_BIND_EXIST.getValue());
+            return ResponseResult.fail(CAR_BIND_EXISTS.getCode(), CAR_BIND_EXISTS.getValue());
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -69,7 +69,7 @@ public class DriverCarBindingRelationshipService {
         map.put("bind_state", DRIVER_CAR_BIND);
         List<DriverCarBindingRelationship> ships = driverCarBindingRelationshipMapper.selectByMap(map);
         if (ships.isEmpty()){
-            return ResponseResult.fail(DRIVER_CAR_BIND_NOT_EXIST.getCode(), DRIVER_CAR_BIND_NOT_EXIST.getValue());
+            return ResponseResult.fail(DRIVER_CAR_BIND_NOT_EXISTS.getCode(), DRIVER_CAR_BIND_NOT_EXISTS.getValue());
         }
         DriverCarBindingRelationship ship = ships.get(0);
         ship.setBindState(DRIVER_CAR_UNBIND);

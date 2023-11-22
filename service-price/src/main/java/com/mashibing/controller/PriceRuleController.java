@@ -35,6 +35,6 @@ public class PriceRuleController {
      * @param priceRule
      * @return
      */
-    @GetMapping("/is-exist")
+    @PostMapping("/is-exist")
     public ResponseResult<Boolean> isExist(@RequestBody PriceRule priceRule){return priceRuleService.isExist(priceRule);}
 }
