@@ -66,7 +66,7 @@ public class TerminalClient {
         for (int i = 0; i < jsonArray.size(); i++) {
             TerminalResponse terminalResponse = new TerminalResponse();
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            Long carId = Long.valueOf(jsonObject.getString("desc"));
+            Long carId = Long.parseLong(jsonObject.getString("desc"));
             String tid = jsonObject.getString("tid");
             terminalResponse.setCarId(carId);
             terminalResponse.setTid(tid);
