@@ -1,6 +1,7 @@
 package com.mashibing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mashibing.constant.OrderConstants;
 import com.mashibing.dto.OrderInfo;
 import com.mashibing.dto.PriceRule;
 import com.mashibing.dto.ResponseResult;
@@ -9,8 +10,10 @@ import com.mashibing.remote.ServiceDriverUserClient;
 import com.mashibing.remote.ServiceMapClient;
 import com.mashibing.remote.ServicePriceClient;
 import com.mashibing.request.OrderRequest;
+import com.mashibing.response.OrderDriverResponse;
 import com.mashibing.response.TerminalResponse;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.mashibing.constant.CommonStatusEnum.*;
-import static com.mashibing.constant.OrderConstants.*;
+import static com.mashibing.constant.OrderConstants.ORDER_START;
 import static com.mashibing.util.RedisPrefixUtils.blackDeviceCodePrefix;
 
 /**
@@ -65,8 +68,8 @@ public class OrderInfoService {
             return ResponseResult.fail(DEVICE_IS_BLACK.getCode(), DEVICE_IS_BLACK.getValue());
         }
 
-        //判断正在进行的订单不允许下单
-        if (extracted(orderRequest)) {
+        // 判断乘客 是否有进行中的订单
+        if (isPassengerOrderGoingon(orderRequest.getPassengerId()) > 0) {
             return ResponseResult.fail(ORDER_GOING_ON.getCode(), ORDER_GOING_ON.getValue());
         }
 
@@ -105,13 +108,38 @@ public class OrderInfoService {
         radiusList.add(4000);
         radiusList.add(5000);
         //搜索结果
-        ResponseResult<List<TerminalResponse>> result = null;
+        ResponseResult<List<TerminalResponse>> result;
         for (int i = 0; i < radiusList.size(); i++) {
             Integer radius = radiusList.get(i);
             result = serviceMapClient.aroundSearch(center, radius);
             log.info("在半径为 "+radius+"m 的范围内，寻找车辆" + JSONObject.fromObject(result.getData().get(0)));
-            //获得终端
+            //获得终端{"carId":1716724829761400833,"tid":"775745186"}
+
             //解析终端
+            JSONArray jsonArray = JSONArray.fromObject(result.getData());
+            for (int j = 0; j < jsonArray.size(); j++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(j);
+                String carIdStr = jsonObject.getString("carId");
+                Long carId = Long.parseLong(carIdStr);
+
+                //查询是否有多余的可派单司机
+                ResponseResult<OrderDriverResponse> availableDriver = serviceDriverUserClient.getAvailableDriver(carId);
+                if (availableDriver.getCode() == AVAILABLE_DRIVER_EMPTY.getCode()){
+                    log.info("没有车辆ID:"+carId+"对应的司机");
+                    continue;
+                }else {
+                    log.info("车辆ID:"+carId+"找到了正在出车的司机");
+                    OrderDriverResponse data = availableDriver.getData();
+                    Long driverId = data.getDriverId();
+                    // 判断司机 是否有进行中的订单
+                    if (isDriverOrderGoingon(driverId) > 0) {
+                        continue;
+                    }
+                    //退出 不在进行司机的查找
+                    break;
+                }
+
+            }
             //根据解析出来的终端，查询车辆
             //找到符合的车辆，进行派单
             //如果派单成功，退出循环
@@ -153,28 +181,54 @@ public class OrderInfoService {
     }
 
     /**
-     * 是否有业务中的订单
-     *
-     * @param orderRequest
+     * 判断是否有 业务中的订单
+     * @param passengerId
      * @return
      */
-    private boolean extracted(OrderRequest orderRequest) {
-        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
-        wrapper.eq("passenger_id", orderRequest.getPassengerId());
-        wrapper.and(w -> w.eq("order_status", ORDER_START))
-                .or(w -> w.eq("order_status", DRIVER_RECEIVE_ORDER))
-                .or(w -> w.eq("order_status", DRIVER_TO_PICK_UP_PASSENGER))
-                .or(w -> w.eq("order_status", DRIVER_ARRIVED_DEPARTURE))
-                .or(w -> w.eq("order_status", PICK_UP_PASSENGER))
-                .or(w -> w.eq("order_status", TO_START_PAY)
-                );
-        Integer count = orderInfoMapper.selectCount(wrapper);
-        if (count > 0) {
-            return true;
-        }
-        return false;
+    private int isPassengerOrderGoingon(Long passengerId){
+        // 判断有正在进行的订单不允许下单
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("passenger_id",passengerId);
+        queryWrapper.and(wrapper->wrapper.eq("order_status",OrderConstants.ORDER_START)
+                .or().eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+                .or().eq("order_status",OrderConstants.PICK_UP_PASSENGER)
+                .or().eq("order_status",OrderConstants.PASSENGER_GETOFF)
+                .or().eq("order_status",OrderConstants.TO_START_PAY)
+        );
+
+
+        Integer validOrderNumber = orderInfoMapper.selectCount(queryWrapper);
+
+        return validOrderNumber;
+
     }
 
+    /**
+     * 判断是否有 业务中的订单
+     * @param driverId
+     * @return
+     */
+    private int isDriverOrderGoingon(Long driverId){
+        // 判断有正在进行的订单不允许下单
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("driver_id",driverId);
+        queryWrapper.and(wrapper->wrapper
+                .eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+                .or().eq("order_status", OrderConstants.PICK_UP_PASSENGER)
+
+        );
+
+
+        Integer validOrderNumber = orderInfoMapper.selectCount(queryWrapper);
+        log.info("司机Id："+driverId+",正在进行的订单的数量："+validOrderNumber);
+
+        return validOrderNumber;
+
+    }
     public ResponseResult testMapper() {
         OrderInfo order = new OrderInfo();
         order.setAddress("10001");
