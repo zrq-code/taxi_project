@@ -2,6 +2,7 @@ package com.mashibing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.mashibing.constant.OrderConstants;
+import com.mashibing.dto.Car;
 import com.mashibing.dto.OrderInfo;
 import com.mashibing.dto.PriceRule;
 import com.mashibing.dto.ResponseResult;
@@ -13,7 +14,6 @@ import com.mashibing.request.OrderRequest;
 import com.mashibing.response.OrderDriverResponse;
 import com.mashibing.response.TerminalResponse;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +50,7 @@ public class OrderInfoService {
     private ServiceDriverUserClient serviceDriverUserClient;
     @Autowired
     private ServiceMapClient serviceMapClient;
+
 
     public ResponseResult add(OrderRequest orderRequest) {
         //测试当前城市是否有可用的司机
@@ -112,29 +113,51 @@ public class OrderInfoService {
         for (int i = 0; i < radiusList.size(); i++) {
             Integer radius = radiusList.get(i);
             result = serviceMapClient.aroundSearch(center, radius);
-            log.info("在半径为 "+radius+"m 的范围内，寻找车辆" + JSONObject.fromObject(result.getData().get(0)));
+            log.info("在半径为 " + radius + "m 的范围内，寻找车辆" + JSONObject.fromObject(result.getData().get(0)));
             //获得终端{"carId":1716724829761400833,"tid":"775745186"}
 
             //解析终端
-            JSONArray jsonArray = JSONArray.fromObject(result.getData());
-            for (int j = 0; j < jsonArray.size(); j++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(j);
-                String carIdStr = jsonObject.getString("carId");
-                Long carId = Long.parseLong(carIdStr);
+            List<TerminalResponse> data1 = result.getData();
+            for (TerminalResponse terminalResponse : data1) {
+                Long carId = terminalResponse.getCarId();
+                String longitude = terminalResponse.getLongitude();
+                String latitude = terminalResponse.getLatitude();
 
                 //查询是否有多余的可派单司机
                 ResponseResult<OrderDriverResponse> availableDriver = serviceDriverUserClient.getAvailableDriver(carId);
-                if (availableDriver.getCode() == AVAILABLE_DRIVER_EMPTY.getCode()){
-                    log.info("没有车辆ID:"+carId+"对应的司机");
+                if (availableDriver.getCode() == AVAILABLE_DRIVER_EMPTY.getCode()) {
+                    log.info("没有车辆ID:" + carId + "对应的司机");
                     continue;
-                }else {
-                    log.info("车辆ID:"+carId+"找到了正在出车的司机");
+                } else {
+                    log.info("车辆ID:" + carId + "找到了正在出车的司机");
                     OrderDriverResponse data = availableDriver.getData();
                     Long driverId = data.getDriverId();
+                    String driverPhone = data.getDriverPhone();
+                    String licenseId = data.getLicenseId();
+                    String vehicleNo = data.getVehicleNo();
                     // 判断司机 是否有进行中的订单
                     if (isDriverOrderGoingon(driverId) > 0) {
                         continue;
                     }
+                    //订单直接匹配司机
+                    //查询当前车辆信息
+                    QueryWrapper<Car> carQueryWrapper = new QueryWrapper<>();
+                    carQueryWrapper.eq("id", carId);
+
+                    //查询当前司机信息
+                    orderInfo.setDriverId(driverId);
+                    orderInfo.setDriverPhone(driverPhone);
+                    orderInfo.setCarId(carId);
+                    //从地图中来
+                    orderInfo.setReceiveOrderCarLongitude(longitude);
+                    orderInfo.setReceiveOrderCarLatitude(latitude);
+
+                    orderInfo.setReceiveOrderTime(LocalDateTime.now());
+                    orderInfo.setLicenseId(licenseId);
+                    orderInfo.setVehicleNo(vehicleNo);
+                    orderInfo.setOrderStatus(OrderConstants.DRIVER_RECEIVE_ORDER);
+
+                    orderInfoMapper.updateById(orderInfo);
                     //退出 不在进行司机的查找
                     break;
                 }
@@ -182,20 +205,21 @@ public class OrderInfoService {
 
     /**
      * 判断是否有 业务中的订单
+     *
      * @param passengerId
      * @return
      */
-    private int isPassengerOrderGoingon(Long passengerId){
+    private int isPassengerOrderGoingon(Long passengerId) {
         // 判断有正在进行的订单不允许下单
         QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("passenger_id",passengerId);
-        queryWrapper.and(wrapper->wrapper.eq("order_status",OrderConstants.ORDER_START)
-                .or().eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
-                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
-                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
-                .or().eq("order_status",OrderConstants.PICK_UP_PASSENGER)
-                .or().eq("order_status",OrderConstants.PASSENGER_GETOFF)
-                .or().eq("order_status",OrderConstants.TO_START_PAY)
+        queryWrapper.eq("passenger_id", passengerId);
+        queryWrapper.and(wrapper -> wrapper.eq("order_status", OrderConstants.ORDER_START)
+                .or().eq("order_status", OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status", OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status", OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+                .or().eq("order_status", OrderConstants.PICK_UP_PASSENGER)
+                .or().eq("order_status", OrderConstants.PASSENGER_GETOFF)
+                .or().eq("order_status", OrderConstants.TO_START_PAY)
         );
 
 
@@ -207,28 +231,30 @@ public class OrderInfoService {
 
     /**
      * 判断是否有 业务中的订单
+     *
      * @param driverId
      * @return
      */
-    private int isDriverOrderGoingon(Long driverId){
+    private int isDriverOrderGoingon(Long driverId) {
         // 判断有正在进行的订单不允许下单
         QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("driver_id",driverId);
-        queryWrapper.and(wrapper->wrapper
-                .eq("order_status",OrderConstants.DRIVER_RECEIVE_ORDER)
-                .or().eq("order_status",OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
-                .or().eq("order_status",OrderConstants.DRIVER_ARRIVED_DEPARTURE)
+        queryWrapper.eq("driver_id", driverId);
+        queryWrapper.and(wrapper -> wrapper
+                .eq("order_status", OrderConstants.DRIVER_RECEIVE_ORDER)
+                .or().eq("order_status", OrderConstants.DRIVER_TO_PICK_UP_PASSENGER)
+                .or().eq("order_status", OrderConstants.DRIVER_ARRIVED_DEPARTURE)
                 .or().eq("order_status", OrderConstants.PICK_UP_PASSENGER)
 
         );
 
 
         Integer validOrderNumber = orderInfoMapper.selectCount(queryWrapper);
-        log.info("司机Id："+driverId+",正在进行的订单的数量："+validOrderNumber);
+        log.info("司机Id：" + driverId + ",正在进行的订单的数量：" + validOrderNumber);
 
         return validOrderNumber;
 
     }
+
     public ResponseResult testMapper() {
         OrderInfo order = new OrderInfo();
         order.setAddress("10001");

@@ -1,10 +1,8 @@
 package com.mashibing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.mashibing.dto.DriverCarBindingRelationship;
-import com.mashibing.dto.DriverUser;
-import com.mashibing.dto.DriverUserWorkStatus;
-import com.mashibing.dto.ResponseResult;
+import com.mashibing.dto.*;
+import com.mashibing.mapper.CarMapper;
 import com.mashibing.mapper.DriverCarBindingRelationshipMapper;
 import com.mashibing.mapper.DriverUserMapper;
 import com.mashibing.mapper.DriverUserWorkStatusMapper;
@@ -29,6 +27,8 @@ public class DriverUserService {
     private DriverUserWorkStatusMapper driverUserWorkStatusMapper;
     @Autowired
     private DriverCarBindingRelationshipMapper driverCarBindingRelationshipMapper;
+    @Autowired
+    private CarMapper carMapper;
 
     public ResponseResult getDriverUser() {
         DriverUser driverUser = driverUserMapper.selectById(1);
@@ -68,9 +68,11 @@ public class DriverUserService {
     }
 
     public ResponseResult<OrderDriverResponse> getAvailableDriver(@PathVariable("carId") Long carId) {
+        // 车辆和司机绑定关系查询
         QueryWrapper<DriverCarBindingRelationship> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("car_id", carId);
         queryWrapper.eq("bind_state", DRIVER_CAR_BIND);
+        // 司机工作状态查询
         DriverCarBindingRelationship relationship = driverCarBindingRelationshipMapper.selectOne(queryWrapper);
         Long driverId = relationship.getDriverId();
         QueryWrapper<DriverUserWorkStatus> queryWrapper2 = new QueryWrapper<>();
@@ -81,13 +83,20 @@ public class DriverUserService {
         if (null == driverUserWorkStatus) {
             return ResponseResult.fail(AVAILABLE_DRIVER_EMPTY.getCode(), AVAILABLE_DRIVER_EMPTY.getValue());
         }else {
+            // 司机信息查询
             QueryWrapper<DriverUser> queryWrapper3 = new QueryWrapper<>();
             queryWrapper3.eq("id", driverId);
             DriverUser driverUser = driverUserMapper.selectOne(queryWrapper3);
+            QueryWrapper<Car> carQueryWrapper = new QueryWrapper<>();
+            carQueryWrapper.eq("id", carId);
+            Car car = carMapper.selectOne(carQueryWrapper);
+
             OrderDriverResponse orderDriverResponse = new OrderDriverResponse();
             orderDriverResponse.setCarId(carId);
             orderDriverResponse.setDriverId(driverId);
             orderDriverResponse.setDriverPhone(driverUser.getDriverPhone());
+            orderDriverResponse.setLicenseId(driverUser.getLicenseId());
+            orderDriverResponse.setVehicleNo(car.getVehicleNo());
             return ResponseResult.success(orderDriverResponse);
         }
     }
