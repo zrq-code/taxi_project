@@ -24,7 +24,7 @@
         </resources>
     </build>
 
-    <artifactId>serivce-driver-user</artifactId>
+    <artifactId>service-driver-user</artifactId>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -1,6 +1,7 @@
 package com.mashibing.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.mashibing.constant.IdentityConstants;
 import com.mashibing.constant.OrderConstants;
 import com.mashibing.dto.Car;
 import com.mashibing.dto.OrderInfo;
@@ -10,6 +11,7 @@ import com.mashibing.mapper.OrderInfoMapper;
 import com.mashibing.remote.ServiceDriverUserClient;
 import com.mashibing.remote.ServiceMapClient;
 import com.mashibing.remote.ServicePriceClient;
+import com.mashibing.remote.ServiceSsePushClient;
 import com.mashibing.request.OrderRequest;
 import com.mashibing.response.OrderDriverResponse;
 import com.mashibing.response.TerminalResponse;
@@ -54,6 +56,8 @@ public class OrderInfoService {
     private ServiceMapClient serviceMapClient;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private ServiceSsePushClient serviceSsePushClient;
 
 
     public ResponseResult add(OrderRequest orderRequest) {
@@ -168,7 +172,28 @@ public class OrderInfoService {
                     orderInfo.setOrderStatus(OrderConstants.DRIVER_RECEIVE_ORDER);
 
                     orderInfoMapper.updateById(orderInfo);
+
+                    //通知司机
+                    JSONObject driverContent = new  JSONObject();
+
+                    driverContent.put("orderId",orderInfo.getId());
+                    driverContent.put("passengerId",orderInfo.getPassengerId());
+                    driverContent.put("passengerPhone",orderInfo.getPassengerPhone());
+                    driverContent.put("departure",orderInfo.getDeparture());
+                    driverContent.put("depLongitude",orderInfo.getDepLongitude());
+                    driverContent.put("depLatitude",orderInfo.getDepLatitude());
+
+                    driverContent.put("destination",orderInfo.getDestination());
+                    driverContent.put("destLongitude",orderInfo.getDestLongitude());
+                    driverContent.put("destLatitude",orderInfo.getDestLatitude());
+
+
+                    serviceSsePushClient.push(driverId, IdentityConstants.DRIVER_IDENTITY, driverContent.toString());
+
+                    //派单
+
                     lock.unlock();
+
                     //退出 不在进行司机的查找
                     break;
                 }
@@ -176,10 +201,6 @@ public class OrderInfoService {
             }
 
         }
-        //根据解析出来的终端，查询车辆
-        //找到符合的车辆，进行派单
-        //如果派单成功，退出循环
-
 
     }
 

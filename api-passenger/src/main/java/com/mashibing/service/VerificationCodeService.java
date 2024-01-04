@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
-import static com.mashibing.constant.IdentityConstant.PASSENGER_IDENTITY;
+import static com.mashibing.constant.IdentityConstants.PASSENGER_IDENTITY;
 import static com.mashibing.constant.TokenConstant.ACCESS_TOKEN_TYPE;
 import static com.mashibing.constant.TokenConstant.REFRESH_TOKEN_TYPE;
 

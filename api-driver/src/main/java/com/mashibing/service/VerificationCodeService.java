@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import static com.mashibing.constant.CommonStatusEnum.DRIVER_NOT_EXITST;
 import static com.mashibing.constant.CommonStatusEnum.VERIFICATION_CODE_ERROR;
 import static com.mashibing.constant.DriverCarConstants.DRIVER_NOT_EXISTS;
-import static com.mashibing.constant.IdentityConstant.DRIVER_IDENTITY;
+import static com.mashibing.constant.IdentityConstants.DRIVER_IDENTITY;
 import static com.mashibing.constant.TokenConstant.ACCESS_TOKEN_TYPE;
 import static com.mashibing.constant.TokenConstant.REFRESH_TOKEN_TYPE;
 
