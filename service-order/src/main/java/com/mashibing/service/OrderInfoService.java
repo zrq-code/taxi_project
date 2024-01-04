@@ -157,7 +157,6 @@ public class OrderInfoService {
                     //查询当前车辆信息
                     QueryWrapper<Car> carQueryWrapper = new QueryWrapper<>();
                     carQueryWrapper.eq("id", carId);
-
                     //查询当前司机信息
                     orderInfo.setDriverId(driverId);
                     orderInfo.setDriverPhone(driverPhone);
@@ -165,33 +164,40 @@ public class OrderInfoService {
                     //从地图中来
                     orderInfo.setReceiveOrderCarLongitude(longitude);
                     orderInfo.setReceiveOrderCarLatitude(latitude);
-
                     orderInfo.setReceiveOrderTime(LocalDateTime.now());
                     orderInfo.setLicenseId(licenseId);
                     orderInfo.setVehicleNo(vehicleNo);
                     orderInfo.setOrderStatus(OrderConstants.DRIVER_RECEIVE_ORDER);
-
                     orderInfoMapper.updateById(orderInfo);
 
                     //通知司机
-                    JSONObject driverContent = new  JSONObject();
-
-                    driverContent.put("orderId",orderInfo.getId());
-                    driverContent.put("passengerId",orderInfo.getPassengerId());
-                    driverContent.put("passengerPhone",orderInfo.getPassengerPhone());
-                    driverContent.put("departure",orderInfo.getDeparture());
-                    driverContent.put("depLongitude",orderInfo.getDepLongitude());
-                    driverContent.put("depLatitude",orderInfo.getDepLatitude());
-
-                    driverContent.put("destination",orderInfo.getDestination());
-                    driverContent.put("destLongitude",orderInfo.getDestLongitude());
-                    driverContent.put("destLatitude",orderInfo.getDestLatitude());
-
-
+                    JSONObject driverContent = new JSONObject();
+                    driverContent.put("orderId", orderInfo.getId());
+                    driverContent.put("passengerId", orderInfo.getPassengerId());
+                    driverContent.put("passengerPhone", orderInfo.getPassengerPhone());
+                    driverContent.put("departure", orderInfo.getDeparture());
+                    driverContent.put("depLongitude", orderInfo.getDepLongitude());
+                    driverContent.put("depLatitude", orderInfo.getDepLatitude());
+                    driverContent.put("destination", orderInfo.getDestination());
+                    driverContent.put("destLongitude", orderInfo.getDestLongitude());
+                    driverContent.put("destLatitude", orderInfo.getDestLatitude());
                     serviceSsePushClient.push(driverId, IdentityConstants.DRIVER_IDENTITY, driverContent.toString());
 
-                    //派单
-
+                    // 通知乘客
+                    JSONObject passengerContent = new JSONObject();
+                    passengerContent.put("orderId", orderInfo.getId());
+                    passengerContent.put("driverId", orderInfo.getDriverId());
+                    passengerContent.put("driverPhone", orderInfo.getDriverPhone());
+                    passengerContent.put("vehicleNo", orderInfo.getVehicleNo());
+                    // 车辆信息，调用车辆服务
+                    ResponseResult<Car> carById = serviceDriverUserClient.getCarById(carId);
+                    Car carRemote = carById.getData();
+                    passengerContent.put("brand", carRemote.getBrand());
+                    passengerContent.put("model", carRemote.getModel());
+                    passengerContent.put("vehicleColor", carRemote.getVehicleColor());
+                    passengerContent.put("receiveOrderCarLongitude", orderInfo.getReceiveOrderCarLongitude());
+                    passengerContent.put("receiveOrderCarLatitude", orderInfo.getReceiveOrderCarLatitude());
+                    serviceSsePushClient.push(orderInfo.getPassengerId(), IdentityConstants.PASSENGER_IDENTITY, passengerContent.toString());
                     lock.unlock();
 
                     //退出 不在进行司机的查找
