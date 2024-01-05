@@ -1,7 +1,9 @@
 package com.mashibing.remote;
 
+import com.mashibing.constant.AmapConfigConstants;
 import com.mashibing.dto.ResponseResult;
 import com.mashibing.response.TerminalResponse;
+import com.mashibing.response.TrsearchResponse;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,4 +82,47 @@ public class TerminalClient {
         return ResponseResult.success(terminalResponses);
     }
 
+    public ResponseResult<TrsearchResponse> trsearch(String tid, Long starttime , Long endtime){
+        // 拼装请求的url
+        StringBuilder url = new StringBuilder();
+        url.append(AmapConfigConstants.TERMINAL_TRSEARCH);
+        url.append("?");
+        url.append("key="+amapKey);
+        url.append("&");
+        url.append("sid="+amapSid);
+        url.append("&");
+        url.append("tid="+tid);
+        url.append("&");
+        url.append("starttime="+starttime);
+        url.append("&");
+        url.append("endtime="+endtime);
+
+        System.out.println("高德地图查询轨迹结果请求："+url.toString());
+        ResponseEntity<String> forEntity = restTemplate.getForEntity(url.toString(), String.class);
+        System.out.println("高德地图查询轨迹结果响应："+forEntity.getBody());
+
+        JSONObject result = JSONObject.fromObject(forEntity.getBody());
+        JSONObject data = result.getJSONObject("data");
+        int counts = data.getInt("counts");
+        if (counts == 0){
+            return null;
+        }
+        JSONArray tracks = data.getJSONArray("tracks");
+        long driveMile = 0L;
+        long driveTime = 0L;
+        for (int i=0;i<tracks.size();i++){
+            JSONObject jsonObject = tracks.getJSONObject(i);
+
+            long distance = jsonObject.getLong("distance");
+            driveMile += distance;
+
+            long time = jsonObject.getLong("time") / (1000 * 60);
+            driveTime += time;
+        }
+        TrsearchResponse trsearchResponse = new TrsearchResponse();
+        trsearchResponse.setDriveMile(driveMile);
+        trsearchResponse.setDriveTime(driveTime);
+        return ResponseResult.success(trsearchResponse);
+
+    }
 }

@@ -2,29 +2,19 @@ package com.mashibing.controller;
 
 import com.mashibing.dto.ResponseResult;
 import com.mashibing.request.OrderRequest;
-import com.mashibing.service.OrderInfoService;
-import lombok.extern.slf4j.Slf4j;
+import com.mashibing.service.ApiDriverOrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/order")
-@Slf4j
-public class OrderInfoController {
+public class OrderController {
+
     @Autowired
-    private OrderInfoService orderInfoService;
-    @PostMapping("/add")
-    public ResponseResult add(@RequestBody OrderRequest orderRequest, HttpServletRequest httpServletRequest){
-        /*String deviceCode = httpServletRequest.getHeader(DEVICE_CODE);
-        orderRequest.setDeviceCode(deviceCode);*/
-        return orderInfoService.add(orderRequest);
-    }
-    @GetMapping("/test")
-    public ResponseResult getTest(){
-        return orderInfoService.testMapper();
-    }
+    ApiDriverOrderInfoService apiDriverOrderInfoService;
 
     /**
      * 去接乘客
@@ -33,8 +23,7 @@ public class OrderInfoController {
      */
     @PostMapping("/to-pick-up-passenger")
     public ResponseResult changeStatus(@RequestBody OrderRequest orderRequest){
-
-        return orderInfoService.toPickUpPassenger(orderRequest);
+        return apiDriverOrderInfoService.toPickUpPassenger(orderRequest);
     }
 
     /**
@@ -44,7 +33,7 @@ public class OrderInfoController {
      */
     @PostMapping("/arrived-departure")
     public ResponseResult arrivedDeparture(@RequestBody OrderRequest orderRequest){
-        return orderInfoService.arrivedDeparture(orderRequest);
+        return apiDriverOrderInfoService.arrivedDeparture(orderRequest);
     }
 
     /**
@@ -54,7 +43,7 @@ public class OrderInfoController {
      */
     @PostMapping("/pick-up-passenger")
     public ResponseResult pickUpPassenger(@RequestBody OrderRequest orderRequest){
-        return orderInfoService.pickUpPassenger(orderRequest);
+        return apiDriverOrderInfoService.pickUpPassenger(orderRequest);
     }
 
     /**
@@ -64,7 +53,7 @@ public class OrderInfoController {
      */
     @PostMapping("/passenger-getoff")
     public ResponseResult passengerGetoff(@RequestBody OrderRequest orderRequest){
-        return orderInfoService.passengerGetoff(orderRequest);
+        return apiDriverOrderInfoService.passengerGetoff(orderRequest);
     }
-    
+
 }
