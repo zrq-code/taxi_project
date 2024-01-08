@@ -159,7 +159,13 @@ public class OrderInfoService {
                     String driverPhone = data.getDriverPhone();
                     String licenseId = data.getLicenseId();
                     String vehicleNo = data.getVehicleNo();
+                    String vehicleType = data.getVehicleType();
 
+                    //判断车辆的车型是否符合
+                    if (!orderInfo.getVehicleType().trim().equals(vehicleType)) {
+                        System.out.println("车型不符合");
+                        continue;
+                    }
                     String lockKey = (String.valueOf(driverId)).intern();
                     RLock lock = redissonClient.getLock(lockKey);
 
@@ -420,11 +426,11 @@ public class OrderInfoService {
         orderInfo.setDriveTime(driveTime);
 
         // 获取价格
-        /*String address = orderInfo.getAddress();
+        String address = orderInfo.getAddress();
         String vehicleType = orderInfo.getVehicleType();
         ResponseResult<Double> doubleResponseResult = servicePriceClient.calculatePrice(driveMile.intValue(), driveTime.intValue(), address, vehicleType);
         Double price = doubleResponseResult.getData();
-        orderInfo.setPrice(price);*/
+        orderInfo.setPrice(price);
 
         orderInfoMapper.updateById(orderInfo);
         return ResponseResult.success();
